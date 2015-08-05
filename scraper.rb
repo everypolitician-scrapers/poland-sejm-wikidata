@@ -21,7 +21,7 @@ end
 info = candidates
 candidates.each_with_index do |p,i|
   puts i if (i % 100).zero?
-  next if p[:wikidata].empty?
+  next if p[:wikidata].to_s.empty?
   data = WikiData::Fetcher.new(id: p[:wikidata]).data('pl') or next
   # puts "%s %s" % [data[:id], data[:name]]
   ScraperWiki.save_sqlite([:id], data)
