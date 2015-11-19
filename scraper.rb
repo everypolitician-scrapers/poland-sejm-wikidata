@@ -8,22 +8,23 @@ require 'scraperwiki'
 require 'wikidata/fetcher'
 require 'cgi'
 
-def candidates
+def members
   morph_api_url = 'https://api.morph.io/tmtmtmtm/poland-sejm-wikipedia/data.json'
   morph_api_key = ENV["MORPH_API_KEY"]
   result = RestClient.get morph_api_url, params: {
     key: morph_api_key,
-    query: "select wikidata from data"
+    query: "SELECT wikipedia__pl AS wikiname FROM data"
   }
   JSON.parse(result, symbolize_names: true)
 end
 
-info = candidates
-candidates.each_with_index do |p,i|
-  puts i if (i % 100).zero?
-  next if p[:wikidata].to_s.empty?
-  data = WikiData::Fetcher.new(id: p[:wikidata]).data('pl') or next
-  # puts "%s %s" % [data[:id], data[:name]]
+WikiData.ids_from_pages('pl', members.map { |c| c[:wikiname] }).each_with_index do |p, i|
+  data = WikiData::Fetcher.new(id: p.last).data('pl') rescue nil
+  unless data
+    warn "No data for #{p}"
+    next
+  end
+  data[:original_wikiname] = p.first
   ScraperWiki.save_sqlite([:id], data)
 end
 
