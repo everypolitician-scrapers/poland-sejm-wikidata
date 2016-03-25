@@ -4,7 +4,5 @@
 require 'wikidata/fetcher'
 
 names = EveryPolitician::Wikidata.morph_wikinames(source: 'tmtmtmtm/poland-sejm-wikipedia', column: 'wikipedia__pl')
-names.shuffle.each_slice(25) do |sliced|
-  EveryPolitician::Wikidata.scrape_wikidata(names: { pl: names })
-end
+EveryPolitician::Wikidata.scrape_wikidata(names: { pl: names }, batch_size: 100)
 
